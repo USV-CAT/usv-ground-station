@@ -58,8 +58,13 @@ distrobox enter "$BOX" -- bash -euo pipefail -c '
     sudo apt-get update -qq
     sudo apt-get install -y -qq build-essential pkg-config libasound2-dev libudev-dev curl ca-certificates >/dev/null
   fi
-  if ! command -v cargo >/dev/null; then
+  if ! command -v rustup >/dev/null; then
     curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+  fi
+  # A half-finished earlier install can leave rustup with no default toolchain.
+  if ! cargo --version >/dev/null 2>&1; then
+    rustup toolchain install stable --profile minimal
+    rustup default stable
   fi
   cd "'"$HERE"'"
   CARGO_TARGET_DIR=target/distrobox cargo build --release --locked
