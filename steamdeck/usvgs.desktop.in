@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=USV Ground Station
+GenericName=Boat ground control station
+Comment=Drive and survey with a catamaran USV (simulated)
+Exec=@HERE@/run.sh
+Path=@HERE@
+Icon=applications-science
+Terminal=false
+Categories=Science;Education;Game;
+Actions=Windowed;
+
+[Desktop Action Windowed]
+Name=Run in a window
+Exec=@HERE@/run.sh --windowed
