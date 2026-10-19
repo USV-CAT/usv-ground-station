@@ -66,14 +66,20 @@ Python station still load.
 In Desktop Mode, open Konsole in this folder and run:
 
 ```bash
-./steamdeck/install.sh
+./install.sh
 ```
 
-The Deck has no Rust compiler by default. Either install one with rustup, or
-build on a Linux PC (`cargo build --release`) and copy `target/release/usvgs`
-into this folder's `target/release/` on the Deck. A binary built on a much
-newer distribution than SteamOS may not run there; building on the Deck is the
-safe choice.
+The Deck has no Rust compiler, and it doesn't need one: the repository carries
+a prebuilt `bin/usvgs`, which `run.sh` uses when Rust is not installed. It is
+built in a Debian 12 distrobox (glibc 2.35), so it runs on SteamOS. To rebuild
+it from the current sources, on the Deck or on any Linux PC with distrobox:
+
+```bash
+./install.sh --build      # or just: ./steamdeck/build.sh
+```
+
+This creates a `usvgs-build` container with its own Rust toolchain (kept in
+`~/.local/share/usvgs-rust`), and nothing is installed on SteamOS itself.
 
 That adds **USV Ground Station** to the menu. Then, in Steam, use *Add a
 Non-Steam Game* and pick it, and choose the *Gamepad with Mouse Trackpad*

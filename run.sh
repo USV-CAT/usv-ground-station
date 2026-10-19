@@ -7,17 +7,26 @@
 #   ./run.sh --view chase  start in the 3D chase camera
 #   ./run.sh pads          test the gamepad / Steam Deck controls
 #
-# The first run compiles the release build (a few minutes); after that it
-# starts straight away, and rebuilds only when the sources change.
+# With Rust installed it builds from source (the first build takes a few
+# minutes, later runs rebuild only what changed). Without Rust it runs the
+# prebuilt bin/usvgs, and if that is missing it builds one in a distrobox
+# (see steamdeck/build.sh).
 
 set -euo pipefail
 cd "$(dirname "$0")"
 
-BIN="target/release/usvgs"
-if ! command -v cargo >/dev/null; then
-  if [ -x "$BIN" ]; then exec "$BIN" "$@"; fi
-  echo "!! needs Rust to build (https://rustup.rs), or a prebuilt $BIN" >&2
-  exit 1
+if command -v cargo >/dev/null; then
+  cargo build --release --quiet
+  exec target/release/usvgs "$@"
 fi
-cargo build --release --quiet
-exec "$BIN" "$@"
+
+PREBUILT="bin/usvgs"
+if [ ! -x "$PREBUILT" ]; then
+  if command -v distrobox >/dev/null; then
+    ./steamdeck/build.sh >&2
+  else
+    echo "!! no Rust (https://rustup.rs), no prebuilt $PREBUILT and no distrobox to build one" >&2
+    exit 1
+  fi
+fi
+exec "$PREBUILT" "$@"
