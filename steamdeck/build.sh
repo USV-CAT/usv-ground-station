@@ -22,6 +22,14 @@ if ! command -v distrobox >/dev/null; then
   exit 1
 fi
 
+# After a reboot or a killed container, rootless podman can be left pointing
+# at a pause process that no longer exists ("cannot join mount namespace for
+# <pid>"). `podman system migrate` starts a fresh one.
+if command -v podman >/dev/null && ! podman ps >/dev/null 2>&1; then
+  echo "[*] podman is stuck, resetting it (podman system migrate)…"
+  podman system migrate
+fi
+
 if ! distrobox list 2>/dev/null | awk -F'|' '{gsub(/ /,"",$2); print $2}' | grep -qx "$BOX"; then
   echo "[*] creating the $BOX container ($IMAGE)…"
   distrobox create --yes --no-entry --name "$BOX" --image "$IMAGE"
