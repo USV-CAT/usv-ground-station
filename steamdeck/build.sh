@@ -58,16 +58,18 @@ distrobox enter "$BOX" -- bash -euo pipefail -c '
     sudo apt-get update -qq
     sudo apt-get install -y -qq build-essential pkg-config libasound2-dev libudev-dev curl ca-certificates >/dev/null
   fi
-  if ! command -v rustup >/dev/null; then
-    curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+  # Use only our own rustup: the box shares $HOME (and so PATH may hold the
+  # host'"'"'s ~/.cargo/bin), and a host rustup refuses to work on this CARGO_HOME.
+  if [ ! -x "$CARGO_HOME/bin/rustup" ]; then
+    curl -sSf https://sh.rustup.rs | RUSTUP_INIT_SKIP_PATH_CHECK=yes sh -s -- -y --profile minimal --no-modify-path
   fi
   # A half-finished earlier install can leave rustup with no default toolchain.
-  if ! cargo --version >/dev/null 2>&1; then
-    rustup toolchain install stable --profile minimal
-    rustup default stable
+  if ! "$CARGO_HOME/bin/cargo" --version >/dev/null 2>&1; then
+    "$CARGO_HOME/bin/rustup" toolchain install stable --profile minimal
+    "$CARGO_HOME/bin/rustup" default stable
   fi
   cd "'"$HERE"'"
-  CARGO_TARGET_DIR=target/distrobox cargo build --release --locked
+  CARGO_TARGET_DIR=target/distrobox "$CARGO_HOME/bin/cargo" build --release --locked
 '
 
 mkdir -p "$HERE/bin"
