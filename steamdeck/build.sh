@@ -22,12 +22,27 @@ if ! command -v distrobox >/dev/null; then
   exit 1
 fi
 
+if [ -e /run/.containerenv ] || [ -e /.flatpak-info ] || [ -n "${container:-}" ]; then
+  echo "!! this terminal is inside a container (distrobox, toolbox or a Flatpak app)." >&2
+  echo "   Open a normal Konsole on the host and run this again." >&2
+  exit 1
+fi
+
 # After a reboot or a killed container, rootless podman can be left pointing
-# at a pause process that no longer exists ("cannot join mount namespace for
-# <pid>"). `podman system migrate` starts a fresh one.
+# at a pause process that no longer exists ("cannot join/set mount namespace").
+# Clear the stale pause process and let podman start a fresh one.
 if command -v podman >/dev/null && ! podman ps >/dev/null 2>&1; then
-  echo "[*] podman is stuck, resetting it (podman system migrate)…"
-  podman system migrate
+  echo "[*] podman is stuck, resetting it…"
+  RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+  if [ -f "$RUN/libpod/tmp/pause.pid" ]; then
+    kill "$(cat "$RUN/libpod/tmp/pause.pid")" 2>/dev/null || true
+    rm -f "$RUN/libpod/tmp/pause.pid"
+  fi
+  podman system migrate || true
+  if ! podman ps >/dev/null; then
+    echo "!! podman still fails; reboot the Deck and run this again." >&2
+    exit 1
+  fi
 fi
 
 if ! distrobox list 2>/dev/null | awk -F'|' '{gsub(/ /,"",$2); print $2}' | grep -qx "$BOX"; then
