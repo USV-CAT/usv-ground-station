@@ -15,7 +15,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-if command -v cargo >/dev/null; then
+# Only a working cargo counts: a bare rustup install with no toolchain has a
+# `cargo` that just prints "could not choose a version".
+if cargo --version >/dev/null 2>&1; then
   cargo build --release --quiet
   exec target/release/usvgs "$@"
 fi
