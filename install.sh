@@ -4,18 +4,27 @@
 #
 # Run once from Desktop Mode, in Konsole:
 #
-#     ./steamdeck/install.sh
+#     ./install.sh            use the prebuilt bin/usvgs (or Rust, if installed)
+#     ./install.sh --build    rebuild bin/usvgs in a distrobox first
 #
-# It builds the station (or uses target/release/usvgs copied over from a PC),
-# adds "USV Ground Station" to the
-# application menu, and tells you how to add it to Steam so it starts from
-# Game Mode with the Deck's controls.
+# It checks the station starts, adds "USV Ground Station" to the application
+# menu, and tells you how to add it to Steam so it starts from Game Mode with
+# the Deck's controls.
 
 set -euo pipefail
-HERE="$(cd "$(dirname "$0")/.." && pwd)"
+HERE="$(cd "$(dirname "$0")" && pwd)"
 
-echo "[*] building the station (first time: a few minutes)…"
-"$HERE/run.sh" --version
+if [ "${1:-}" = "--build" ]; then
+  "$HERE/steamdeck/build.sh"
+fi
+
+chmod +x "$HERE/run.sh" "$HERE/steamdeck/build.sh" "$HERE/bin/usvgs" 2>/dev/null || true
+
+echo "[*] checking the station starts…"
+if ! "$HERE/run.sh" --version; then
+  echo "!! the station did not start; try: ./install.sh --build" >&2
+  exit 1
+fi
 
 APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 mkdir -p "$APPS"
