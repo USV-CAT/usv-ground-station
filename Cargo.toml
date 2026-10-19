@@ -1,0 +1,44 @@
+[package]
+name = "usvgs"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Portable ground station for a catamaran USV, made for the Steam Deck"
+license = "MIT"
+readme = "README.md"
+keywords = ["usv", "asv", "ground-control-station", "steam-deck", "bathymetry"]
+default-run = "usvgs"
+
+[dependencies]
+eframe = { version = "0.35", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+egui = "0.35"
+tiny-skia = "0.11"
+gilrs = "0.11"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+flate2 = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+clap = { version = "4", features = ["derive"] }
+ureq = "2"
+libc = "0.2"
+log = "0.4"
+env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }
+rodio = { version = "0.20", default-features = false, features = ["wav", "mp3"] }
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+serialport = { version = "4", default-features = false }
+
+[dev-dependencies]
+accesskit = "=0.24.1"
+egui_kittest = "0.35"
+tempfile = "3"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+
+[profile.dev]
+# The simulator and the chart renderer are numeric loops: unoptimised they
+# are too slow to drive, so even debug builds are optimised.
+opt-level = 2

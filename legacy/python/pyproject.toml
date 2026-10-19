@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "usvgs"
+version = "0.1.0"
+description = "Portable ground station for a catamaran USV, made for the Steam Deck"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["usv", "asv", "boat", "ground-control-station", "steam-deck", "bathymetry"]
+dependencies = ["numpy>=1.22", "PyQt5>=5.15"]
+
+[project.optional-dependencies]
+# SDL knows every controller layout; without it the station reads /dev/input directly.
+gamepad = ["pygame-ce>=2.4"]
+dev = ["pytest>=7.0", "pytest-timeout>=2.0", "ruff"]
+
+[project.scripts]
+usvgs = "usvgs.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["usvgs*"]
+
+[tool.setuptools.package-data]
+usvgs = ["data/*.npz"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+timeout = 120
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+exclude = ["usvgs/tools/osm_pbf.py", "usvgs/tools/osm_build.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "SIM105"]
