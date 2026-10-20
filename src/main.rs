@@ -4,6 +4,7 @@
 //! usvgs                 the ground station (asks: simulator or boat)
 //! usvgs --sim           straight onto the simulator
 //! usvgs --connect udp-listen:14550   straight to a boat over MAVLink
+//! usvgs --fullscreen    full screen, even on a large display (F11 or the ⛶ button toggles)
 //! usvgs --windowed      not full screen, even on a small display
 //! usvgs pads            list gamepads and show live stick values (test the Deck's controls)
 //! usvgs chart ...       build an offline depth chart from EMODnet

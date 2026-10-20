@@ -3,6 +3,7 @@
 # Start the ground station.
 #
 #   ./run.sh               the station, with the simulated catamaran
+#   ./run.sh --fullscreen  full screen on any display (F11 toggles)
 #   ./run.sh --windowed    not full screen
 #   ./run.sh --view chase  start in the 3D chase camera
 #   ./run.sh pads          test the gamepad / Steam Deck controls

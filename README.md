@@ -41,6 +41,7 @@ the gamepad). It needs a Rust toolchain to build: <https://rustup.rs>.
 
 ```bash
 ./run.sh              # full screen on a 1280×800 display, a window elsewhere
+./run.sh --fullscreen # full screen on any display; F11 or the corner button toggles
 ./run.sh --windowed
 ./run.sh --view chase # start in the 3D chase camera (north, heading or chase)
 ./run.sh pads         # check the gamepad / Deck controls are seen
