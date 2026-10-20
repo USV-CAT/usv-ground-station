@@ -211,6 +211,12 @@ fn every_button_does_its_job() {
     t.check("▶ Pre- program", |a| a.vehicle.lock().mode() == Mode::Manual);
     t.check("ARMED (disarm)", |a| !a.vehicle.lock().armed());
 
+    // -- the status bar: full screen on and off (the Deck has no F11) --------------
+    let on = t.click("Full screen") && t.app().is_fullscreen();
+    t.expect("the Full screen button did not turn full screen on", on);
+    let off = t.click("Full screen") && !t.app().is_fullscreen();
+    t.expect("the Full screen button did not turn full screen off", off);
+
     // -- the tool strip -----------------------------------------------------------
     for (label, tool) in [("+ Points", Tool::Points), ("▭ Rect", Tool::Rect), ("◎ Go to", Tool::Goto), ("✋ Pan", Tool::Pan)] {
         t.check(label, |a| a.canvas.tool == tool);

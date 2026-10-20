@@ -495,8 +495,15 @@ impl App {
         self.vehicle.lock().set_home_here();
     }
 
+    /// Whether the station asked for full screen (F11 or the status-bar button).
+    pub fn is_fullscreen(&self) -> bool {
+        self.is_fullscreen
+    }
+
     fn toggle_fullscreen(&mut self, ctx: &Context) {
-        self.is_fullscreen = !self.is_fullscreen;
+        // Follow the window's real state: the window manager can change it too.
+        let now = ctx.input(|i| i.viewport().fullscreen).unwrap_or(self.is_fullscreen);
+        self.is_fullscreen = !now;
         ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(self.is_fullscreen));
     }
 
@@ -858,6 +865,22 @@ impl App {
             p.text(Pos2::new(*right, cy), Align2::RIGHT_CENTER, text, theme::mono_bold(14.0), colour);
             *right -= width + 12.0;
         };
+        // Full-screen toggle at the right edge: the Deck has no F11 key.
+        let fs_rect = Rect::from_center_size(Pos2::new(right - 13.0, cy), Vec2::splat(26.0));
+        let fs = ui.interact(fs_rect, ui.id().with("fullscreen"), Sense::click());
+        fs.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, "Full screen"));
+        let full_now = self.is_fullscreen;
+        let stroke = Stroke::new(2.0, if fs.hovered() { theme::TEXT } else { theme::TEXT_DIM });
+        let r = fs_rect.shrink(5.0);
+        let k = 5.0;
+        // Four corner brackets: pointing out to enter full screen, in to leave it.
+        for (corner, dx, dy) in [(r.left_top(), 1.0, 1.0), (r.right_top(), -1.0, 1.0), (r.left_bottom(), 1.0, -1.0), (r.right_bottom(), -1.0, -1.0)] {
+            let (c, sx, sy) = if full_now { (corner + Vec2::new(dx * k, dy * k), -dx, -dy) } else { (corner, dx, dy) };
+            p.line_segment([c, c + Vec2::new(sx * k, 0.0)], stroke);
+            p.line_segment([c, c + Vec2::new(0.0, sy * k)], stroke);
+        }
+        let toggle_full = fs.on_hover_text(if full_now { "Leave full screen (F11)" } else { "Full screen (F11)" }).clicked();
+        right -= 26.0 + 12.0;
         right_text(&mut right, clock::local_strftime("%H:%M:%S"), theme::TEXT, 86.0);
         // Signal bars.
         let rssi = nav.telemetry.as_ref().filter(|_| nav.link_ok).and_then(|t| t.rssi_dbm);
@@ -885,6 +908,10 @@ impl App {
         right_text(&mut right, pad, if self.pad_state.connected { theme::GOOD } else { theme::TEXT_DIM }, 200.0);
         if open_connect {
             self.open_connect();
+        }
+        if toggle_full {
+            let ctx = ui.ctx().clone();
+            self.toggle_fullscreen(&ctx);
         }
     }
 

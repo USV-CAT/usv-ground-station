@@ -8,7 +8,11 @@ Path=@HERE@
 Icon=applications-science
 Terminal=false
 Categories=Science;Education;Game;
-Actions=Windowed;
+Actions=Fullscreen;Windowed;
+
+[Desktop Action Fullscreen]
+Name=Run full screen
+Exec=@HERE@/run.sh --fullscreen
 
 [Desktop Action Windowed]
 Name=Run in a window
